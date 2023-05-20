@@ -55,12 +55,20 @@ async function run() {
     // find single toys information
     app.get("/alltoys/:id", async (req, res) => {
       // console.log(req.params.id);
-      const jobs = await jobsCollection
-        .findOne({_id: new ObjectId(req.params.id),});
+      const jobs = await jobsCollection.findOne({ _id: new ObjectId(req.params.id) });
       res.send(jobs);
     });
 
-
+    // serach item
+    app.get("/toys/:text", async (req, res) => {
+      const text = req.params.text;
+      const result = await jobsCollection
+        .find({
+          $or: [{ tName: { $regex: text, $options: "i" } }],
+        })
+        .toArray();
+      res.send(result);
+    });
 
     // delete toys from the database
     app.delete("/mytoys/:id", async (req, res) => {
