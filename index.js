@@ -9,7 +9,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.txtczm4.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -24,16 +23,15 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const db = client.db('toyWorld');
+    const db = client.db("toyWorld");
     const jobsCollection = db.collection("toys");
 
     // get all toys from the database
-     app.get("/alltoys", async (req, res) => {
-       const jobs = await jobsCollection.find({}).toArray();
-       res.send(jobs);
-     });
-    
-    
+    app.get("/alltoys", async (req, res) => {
+      const toys = await jobsCollection.find({}).toArray();
+      res.send(toys);
+    });
+
     // add toys to the database
     app.post("/addtoys", async (req, res) => {
       const body = req.body;
@@ -45,15 +43,33 @@ async function run() {
 
     // get toys information from specific emails
     app.get("/mytoys/:email", async (req, res) => {
-      console.log(req.params.email);
-      const jobs = await jobsCollection
+      // console.log(req.params.email);
+      const toys = await jobsCollection
         .find({
           sEmail: req.params.email,
         })
         .toArray();
+      res.send(toys);
+    });
+
+    // find single toys information
+    app.get("/alltoys/:id", async (req, res) => {
+      // console.log(req.params.id);
+      const jobs = await jobsCollection
+        .findOne({_id: new ObjectId(req.params.id),});
       res.send(jobs);
     });
-    
+
+
+
+    // delete toys from the database
+    app.delete("/mytoys/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.deleteOne(query);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -63,7 +79,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 
 app.get("/", (req, res) => {
   res.send("Kids Zone..");
