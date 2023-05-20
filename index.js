@@ -42,6 +42,17 @@ async function run() {
       res.send(result);
       console.log(result);
     });
+
+    // get toys information from specific emails
+    app.get("/mytoys/:email", async (req, res) => {
+      console.log(req.params.email);
+      const jobs = await jobsCollection
+        .find({
+          sEmail: req.params.email,
+        })
+        .toArray();
+      res.send(jobs);
+    });
     
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
