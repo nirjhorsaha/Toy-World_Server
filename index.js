@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    client.connect();
     const db = client.db("toyWorld");
     const jobsCollection = db.collection("toys");
 
@@ -70,6 +70,29 @@ async function run() {
       res.send(result);
     });
 
+    //update toy details
+    app.put("/alltoys/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      console.log(body);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          pURL: body.pURL,
+          sName: body.sName,
+          sEmail: body.sEmail,
+          tName: body.tName,
+          price: body.price,
+          rating: body.rating,
+          aQuantity: body.aQuantity,
+          details: body.details,
+          subCategory: body.subCategory,
+        },
+      };
+      const result = await jobsCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // delete toys from the database
     app.delete("/mytoys/:id", async (req, res) => {
       const id = req.params.id;
@@ -78,7 +101,6 @@ async function run() {
       const result = await jobsCollection.deleteOne(query);
       res.send(result);
     });
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
